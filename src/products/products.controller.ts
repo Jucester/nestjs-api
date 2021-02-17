@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, HttpCode, Param, Req, Res } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, HttpCode, HttpStatus, Param, Req, Res } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { Request, Response } from 'express';
 import { ProductsService } from './products.service';
@@ -7,13 +7,15 @@ import { Product } from './interfaces/Product';
 @Controller('products')
 export class ProductsController {
 
-    constructor(private productsService: ProductsService) {
-
-    }
+    constructor(private productsService: ProductsService) {}
   
     @Get()
-    getProducts() : Promise<Product[]> {
-        return this.productsService.getProducts();
+    async getProducts(@Res() res ) : Promise<Product[]> {
+        const products = await this.productsService.getProducts();
+        return res.status(HttpStatus.OK).json({
+            message: 'Products',
+            products: products
+        });
     }
     /* 
     // Like express
@@ -22,25 +24,39 @@ export class ProductsController {
     } */
   
     @Get(':id')
-    getProduct(@Param('id') id : string) {
-        return this.productsService.getProduct(id);
+    async getProduct(@Res() res, @Param('id') id : string) {
+        const product = await this.productsService.getProduct(id);
+        return res.status(HttpStatus.OK).json({
+            message: 'Product',
+            products: product
+        });
     } 
 
     @Post()
-    addProduct(@Body() product: CreateProductDto )  {
-        return this.productsService.addProduct(product);
+    async addProduct(@Res() res, @Body() product: CreateProductDto )  {
+        const item = await this.productsService.addProduct(product);
+        return res.status(HttpStatus.OK).json({
+            message: 'Created',
+            products: item
+        });
     
     }
 
     @Put(':id')
-    updateProduct(@Body() product: CreateProductDto, @Param('id') id) : string {
-        console.log(product, id)
-        return 'Updating'
+    async updateProduct(@Res() res, @Body() product: CreateProductDto, @Param('id') id)  {
+        const item = await this.productsService.updateProduct(product, id);
+        return res.status(HttpStatus.OK).json({
+            message: 'Updated',
+            products: item
+        });
     }
 
     @Delete(':id') 
-    deleteProduct(@Param('id') id ) : string {
-        console.log(id)
-        return 'Deleting';
+    async deleteProduct(@Res() res, @Param('id') id ) {
+        const product = await this.productsService.deleteProduct(id);
+        return res.status(HttpStatus.OK).json({
+            message: 'Deleted',
+            products: product
+        });
     }
 }
