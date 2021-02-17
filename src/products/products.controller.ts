@@ -1,19 +1,35 @@
-import { Controller, Get, Post, Put, Delete, Body, HttpCode, Param } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, HttpCode, Param, Req, Res } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
+import { Request, Response } from 'express';
+import { ProductsService } from './products.service';
+import { Product } from './interfaces/Product';
 
 @Controller('products')
 export class ProductsController {
 
-    @Get()
-    getProduct() : {} {
-        return {"name" : "hi"};
+    constructor(private productsService: ProductsService) {
+
     }
+  
+    @Get()
+    getProducts() : Promise<Product[]> {
+        return this.productsService.getProducts();
+    }
+    /* 
+    // Like express
+    getProduct(@Req() req, @Res() res) : Response {
+        return res.send('hi');
+    } */
+  
+    @Get(':id')
+    getProduct(@Param('id') id : string) {
+        return this.productsService.getProduct(id);
+    } 
 
     @Post()
-    addProduct(@Body() product: CreateProductDto ) : string {
-        console.log(product);
-        return 'Adding';
-        
+    addProduct(@Body() product: CreateProductDto )  {
+        return this.productsService.addProduct(product);
+    
     }
 
     @Put(':id')
